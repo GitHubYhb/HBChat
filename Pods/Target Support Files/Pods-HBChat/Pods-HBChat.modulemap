@@ -1,0 +1,6 @@
+framework module Pods_HBChat {
+  umbrella header "Pods-HBChat-umbrella.h"
+
+  export *
+  module * { export * }
+}
