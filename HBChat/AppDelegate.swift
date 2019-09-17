@@ -20,7 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         self.window = UIWindow.init(frame: UIScreen.main.bounds)
         
-        self.window?.rootViewController = UINavigationController.init(rootViewController: FriendCircleViewController())
+        self.window?.rootViewController = UINavigationController.init(rootViewController: ViewController())
         self.window?.makeKeyAndVisible()
         
         configBase()

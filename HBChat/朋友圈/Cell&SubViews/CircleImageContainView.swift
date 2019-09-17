@@ -96,7 +96,7 @@ class CircleImageContainView: UIView {
                         // 虽弃用但可用，如果放到block 里面会因为线程回调导致UI错误
                         img = cache.retrieveImageInDiskCache(forKey: urlStr)
                     }
-                    let newSize = self.resizeImage(size: img?.size ?? CGSize(width: 0, height: 0 ))
+                    let newSize = self.resizeImage(size: img?.size ?? CGSize(width: 0, height: 0 ),maxWidth: 250)
                     self.singleImageView.image = img
                     
                     self.singleImageView.snp.updateConstraints{
@@ -179,8 +179,8 @@ class CircleImageContainView: UIView {
 
     }
     
-    func resizeImage(size:CGSize)->CGSize{
-        let maxWidth:CGFloat = 250
+    func resizeImage(size:CGSize,maxWidth:CGFloat)->CGSize{
+        
         var scale:CGFloat = 1
         var newWidth:CGFloat = maxWidth
         var newHeight:CGFloat = maxWidth

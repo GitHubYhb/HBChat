@@ -178,6 +178,19 @@ class FriendCircleViewController: UIViewController {
     @objc func reload(){
         viewModel.getCircleData()
     }
+    func adjustOffset(indexPath:IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath)
+        
+        let viewHeight = self.tableView.frame.size.height
+        
+        let rect = cell!.convert(cell!.bounds, to: self.view!)
+        
+        let offset = viewHeight - rect.maxY - keyboardHeight - 56
+        let currentOffset = tableView.contentOffset
+        let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
+        tableView.setContentOffset(newOffset, animated: true)
+        
+    }
     
     
     //MARK:界面跳转
@@ -194,19 +207,7 @@ class FriendCircleViewController: UIViewController {
         
     }
     
-    func adjustOffset(indexPath:IndexPath) {
-        let cell = tableView.cellForRow(at: indexPath)
-        
-        let viewHeight = self.tableView.frame.size.height
-        
-        let rect = cell!.convert(cell!.bounds, to: self.view!)
- 
-        let offset = viewHeight - rect.maxY - keyboardHeight - 56
-        let currentOffset = tableView.contentOffset
-        let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
-        tableView.setContentOffset(newOffset, animated: true)
-
-    }
+   
 }
 
 
@@ -218,9 +219,8 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         let cell:FriendCircleCell = tableView.dequeueReusableCell(withIdentifier: identity) as! FriendCircleCell
         cell.model = self.dataSource[indexPath.row]
         cell.indexPath = indexPath
-//        cell.allButtonClickBlock = { [weak self] index in
-//
-//        }
+        
+        //MARK: 全文、收起事件
         cell.allButton.rx.tap.subscribe(onNext: {[weak self]  _ in
             cell.model?.isOpen = !cell.model!.isOpen
             //交换数据
@@ -230,6 +230,7 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             }
         }).disposed(by: cell.disposeBag)
         
+        //MARK: 点赞、评论事件
         cell.moreButton.rx.tap.subscribe(onNext: {[unowned self]  _ in
             self.view.endEditing(true)
             //标记要评论或者点赞的 indexPath
@@ -239,24 +240,14 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             self.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
         }).disposed(by: cell.disposeBag)
         
-        
-//        
-//        cell.moreButtonClickBlock = { [unowned self] index in
-//            self.view.endEditing(true)
-//            //标记要评论或者点赞的 indexPath
-//            self.selectedIndexPath = index
-////            let window = UIApplication.shared.delegate?.window
-//            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self.view)
-//            self.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
-//        }
-        
+        //MARK: 分享链接跳转事件
         cell.sharedView.tap.rx.event.subscribe(onNext: {[weak self] tap in
-            
-            
+    
             print("分享连接跳转 == " + (cell.model?.shareInfo!.shareUrl)!)
-            
+        
             self?.toWeb(url: (cell.model?.shareInfo!.shareUrl)!)
         }).disposed(by: cell.disposeBag)
+        
         //MARK:跳转点赞用户
         cell.likeView.toUser.subscribe(onNext: {[weak self] user_id in
             
@@ -271,7 +262,6 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             print("评论用户ID == " + user_id)
             self?.toFriend(user_id: user_id)
             
-      
         }).disposed(by: cell.disposeBag)
         
         //MARK:回复评论
@@ -283,7 +273,6 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             self?.commentInputView.textInputView.becomeFirstResponder()
         }).disposed(by: cell.disposeBag)
         
-       
         //单张图刷新
         cell.imageContainer.needReloadRow.subscribe(onNext: { bool in
             
