@@ -166,6 +166,19 @@
 			path = "好友资料";
 			sourceTree = "<group>";
 		};
+		D061B5E42330C80D0089BEF3 /* Cell&SubViews */ = {
+			isa = PBXGroup;
+			children = (
+				D0EE2C4D232A320E000F16A2 /* FriendCircleCell.swift */,
+				D0EE2C52232A320E000F16A2 /* CircleShareView.swift */,
+				D0EE2C51232A320E000F16A2 /* CircleLikeView.swift */,
+				D0EE2C50232A320E000F16A2 /* CircleImageContainView.swift */,
+				D0EE2C4E232A320E000F16A2 /* CircleCommentsView.swift */,
+				D0EE2C55232A320E000F16A2 /* CircleCommentBtns.swift */,
+			);
+			path = "Cell&SubViews";
+			sourceTree = "<group>";
+		};
 		D0EE2C12232A3144000F16A2 = {
 			isa = PBXGroup;
 			children = (
@@ -228,17 +241,12 @@
 		D0EE2C4C232A320E000F16A2 /* 朋友圈 */ = {
 			isa = PBXGroup;
 			children = (
+				D061B5E42330C80D0089BEF3 /* Cell&SubViews */,
 				D0EE2C53232A320E000F16A2 /* FriendCircleViewController.swift */,
-				D0EE2C4F232A320E000F16A2 /* BaiduImages.swift */,
-				D0EE2C55232A320E000F16A2 /* CircleCommentBtns.swift */,
 				D0EE2C57232A320E000F16A2 /* CircleCommentInputView.swift */,
-				D0EE2C4E232A320E000F16A2 /* CircleCommentsView.swift */,
-				D0EE2C50232A320E000F16A2 /* CircleImageContainView.swift */,
-				D0EE2C51232A320E000F16A2 /* CircleLikeView.swift */,
-				D0EE2C52232A320E000F16A2 /* CircleShareView.swift */,
-				D0EE2C54232A320E000F16A2 /* Extensions.swift */,
-				D0EE2C4D232A320E000F16A2 /* FriendCircleCell.swift */,
 				D0EE2C56232A320E000F16A2 /* FriendCircleViewModel.swift */,
+				D0EE2C4F232A320E000F16A2 /* BaiduImages.swift */,
+				D0EE2C54232A320E000F16A2 /* Extensions.swift */,
 			);
 			path = "朋友圈";
 			sourceTree = "<group>";

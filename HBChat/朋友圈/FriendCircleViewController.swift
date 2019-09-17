@@ -61,6 +61,7 @@ class FriendCircleViewController: UIViewController {
         view.addSubview(commentAndLike)
         view.addSubview(commentInputView)
         
+      
         //MARK: tableView布局
         tableView.snp.makeConstraints{
             $0.top.left.right.bottom.equalToSuperview()

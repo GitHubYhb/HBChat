@@ -122,7 +122,6 @@ class CircleImageContainView: UIView {
     
     lazy var sepView: UIView = {
         let v = UIView.init()
-//        v.backgroundColor = UIColor.red
         return v
     }()
     
@@ -135,7 +134,8 @@ class CircleImageContainView: UIView {
         for index in 0..<9 {
             
             let keyView =  UIImageView.init()
-            keyView.contentMode = .scaleToFill
+            keyView.contentMode = .scaleAspectFit
+            
             self.addSubview(keyView)
             imageViews.append(keyView)
             

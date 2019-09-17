@@ -65,3 +65,44 @@ imageContainer.snp.makeConstraints{
 ### 5、评论点赞模块富文本
 评论点赞模块其实还是有点复杂的。        
 我在做的时候，使用了`YYLabel`，之所以不用`UILabel`的原因是原生`UILabel`设置了超链接之后，字体颜色是死的。
+
+### 6、单张图片修改大小循环引用导致内存泄漏
+我在设置单张图片的时候，由于接口没有返回图片尺寸，所以我需要在图片加载完成之后再根据图片尺寸做UIImageView大小调整。         
+然后我在`kingfisher`加载完图片后的闭包回调中，将尺寸以及需要刷新单行的信息通过`PublishSubject`发送给外界，起初我以为是重复加载图片导致的卡顿问题，后来才发现是因为循环引用导致了内存泄漏！问题很严重啊！      
+于是，我尝试了各种方法，都没有解决。
+这种案例确确实实经常存在，所以我选择不直接用`kingfisher`那种简便的方法。
+在加载图片前，我先判断是否有缓存。如果有缓存就主动获取图片，没有的话，就`下载`图片，注意：这里是`下载`，并不显示图片。
+在下载完成之后，刷新单行时，那必定会有缓存了。下面是代码
+```
+//临时图片
+let urlStr = BaiduImages[0]
+let url = URL(string: urlStr)
+
+let kfManager = KingfisherManager.shared
+// 通过manager 获取cache
+let cache = kfManager.cache
+
+//下载完图片后，必有缓存
+if cache.isCached(forKey: urlStr) {
+    var img = cache.retrieveImageInMemoryCache(forKey: urlStr, options: nil)
+    if img == nil {
+        // 虽弃用但可用，如果放到block 里面会因为线程回调导致UI错误
+        img = cache.retrieveImageInDiskCache(forKey: urlStr)
+    }
+    let newSize = self.resizeImage(size: img?.size ?? CGSize(width: 0, height: 0 ))
+    self.singleImageView.image = img
+
+    self.singleImageView.snp.updateConstraints{
+        $0.width.equalTo(newSize.width)
+        $0.height.equalTo(newSize.height)
+    }
+    self.sepView.snp.updateConstraints{
+        $0.top.equalTo(newSize.height).priority(999)
+    }
+}else{
+    kfManager.downloader.downloadImage(with: url!, options: nil) { result in
+        self.needReloadRow.onNext(true)
+    }
+}
+```
+
