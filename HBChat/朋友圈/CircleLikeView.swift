@@ -8,17 +8,20 @@
 
 import UIKit
 import YYText
+import RxSwift
 
 class CircleLikeView: UIView {
 
+    let toUser = PublishSubject<String>()
+    
     private lazy var likeLabel: YYLabel = {
         let lb = YYLabel.init()
         lb.numberOfLines = 0
         lb.highlightTapAction = { (view, attr, range, rect) in
             let high:YYTextHighlight = attr.yy_attribute(YYTextHighlightAttributeName, at: UInt(range.location)) as! YYTextHighlight
-            //self.jumpToUser.onNext(high.userInfo!["user_id"] as! String)
+            self.toUser.onNext(high.userInfo!["user_id"] as! String)
             
-            print(high.userInfo!["user_id"]!)
+//            print(high.userInfo!["user_id"]!)
         }
         return lb
     }()

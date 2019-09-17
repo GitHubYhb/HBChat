@@ -16,12 +16,12 @@ class CircleImageContainView: UIView {
     private let imageItemSize = 80
     
     private var imageViews = [UIImageView]()
-
-    private let oneImageSize = PublishSubject<CGSize>()
     
     let needReloadRow = PublishSubject<Bool>()
     
-    var images:[String]? {
+    private let updateSepTop = PublishSubject<CGFloat>()
+    
+    var images:[CircleImage]? {
         didSet{
             guard let imgs = images else {
                 return
@@ -60,7 +60,6 @@ class CircleImageContainView: UIView {
                     imgV.isHidden = true
                 }
                 
-                
                 if imgCount>1{
                     var height = 250
                     if imgCount>1 && imgCount<=3{
@@ -81,27 +80,39 @@ class CircleImageContainView: UIView {
                     let imgV = imageViews[index]
                     imgV.isHidden = true
                 }
-//                let kfManager = KingfisherManager.shared
-//                // 通过manager 获取cache
-//                let cache = kfManager.cache'
                 
                 //临时图片
-                let icon_index:Int = Int(arc4random() % 9)
-                let url = URL(string: BaiduImages[icon_index])
+                let urlStr = BaiduImages[0]
+                let url = URL(string: urlStr)
                 
+                let kfManager = KingfisherManager.shared
+                // 通过manager 获取cache
+                let cache = kfManager.cache
                 
-                singleImageView.kf.setImage(with: url, placeholder: nil, options: nil, progressBlock: nil, completionHandler: {result in
-                    _ = result.map({[weak self] imageResult in
+                //下载完图片后，必有缓存
+                if cache.isCached(forKey: urlStr) {
+                    var img = cache.retrieveImageInMemoryCache(forKey: urlStr, options: nil)
+                    if img == nil {
+                        // 虽弃用但可用，如果放到block 里面会因为线程回调导致UI错误
+                        img = cache.retrieveImageInDiskCache(forKey: urlStr)
+                    }
+                    let newSize = self.resizeImage(size: img?.size ?? CGSize(width: 0, height: 0 ))
+                    self.singleImageView.image = img
+                    
+                    self.singleImageView.snp.updateConstraints{
+                        $0.width.equalTo(newSize.width)
+                        $0.height.equalTo(newSize.height)
+                    }
+                    self.sepView.snp.updateConstraints{
+                        $0.top.equalTo(newSize.height).priority(999)
+                    }
+                }else{
+                    kfManager.downloader.downloadImage(with: url!, options: nil) { result in
                         
-                        self!.oneImageSize.onNext(CGSize(width: imageResult.image.size.width, height: imageResult.image.size.height))
-                        
-                        //更新完图片大小之后，发送需要刷新的信号
-                        self!.needReloadRow.onNext(true)
-                    })
-                })
+                        self.needReloadRow.onNext(true)
+                    }
+                }
             }
-            
-            
         }
     }
     lazy var singleImageView: UIImageView = {
@@ -111,11 +122,9 @@ class CircleImageContainView: UIView {
     
     lazy var sepView: UIView = {
         let v = UIView.init()
-//        v.backgroundColor = UIColor.red
+        v.backgroundColor = UIColor.red
         return v
     }()
-    
-    
     
     let dis = DisposeBag()
     
@@ -155,10 +164,11 @@ class CircleImageContainView: UIView {
         singleImageView.snp.makeConstraints{
             $0.top.equalToSuperview()
             $0.left.equalToSuperview()
-            $0.width.height.equalTo(250)
+            $0.width.equalTo(250)
+            $0.height.equalTo(250)
         }
         
-        self.addSubview(sepView)
+        addSubview(sepView)
         sepView.snp.makeConstraints{
             $0.top.equalTo(0).priority(999)
             $0.width.equalTo(100)
@@ -166,18 +176,7 @@ class CircleImageContainView: UIView {
             $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
-        
-        oneImageSize.subscribe(onNext: {[weak self] size in
-            let newSize = self!.resizeImage(size: size)
-            let imgV = self?.singleImageView
-            imgV?.snp.updateConstraints{
-                $0.width.equalTo(newSize.width)
-                $0.height.equalTo(newSize.height)
-            }
-            self!.sepView.snp.updateConstraints{
-                $0.top.equalTo(newSize.height).priority(999)
-            }
-        }).disposed(by: dis)
+
     }
     
     func resizeImage(size:CGSize)->CGSize{

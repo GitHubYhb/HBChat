@@ -10,6 +10,8 @@
 		064C9FF71216E45855167347 /* Pods_HBChatUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E8CF512A5C19F057D3E8724 /* Pods_HBChatUITests.framework */; };
 		2F3CC596366D97FE5AE2E8EB /* Pods_HBChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D902B7FFC24C3B16DDD2E11C /* Pods_HBChat.framework */; };
 		867CEF8519A6FB097C7F7298 /* Pods_HBChatTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE11FB3691B6EF2D3BAD080 /* Pods_HBChatTests.framework */; };
+		D061B5E0232F8CCA0089BEF3 /* ShareWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */; };
+		D061B5E3232F8CD10089BEF3 /* FriendViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */; };
 		D0EE2C1F232A3144000F16A2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE2C1E232A3144000F16A2 /* AppDelegate.swift */; };
 		D0EE2C21232A3144000F16A2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE2C20232A3144000F16A2 /* ViewController.swift */; };
 		D0EE2C24232A3144000F16A2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D0EE2C22232A3144000F16A2 /* Main.storyboard */; };
@@ -62,6 +64,8 @@
 		81DE35F24851F10742413F63 /* Pods-HBChatUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChatUITests.release.xcconfig"; path = "Target Support Files/Pods-HBChatUITests/Pods-HBChatUITests.release.xcconfig"; sourceTree = "<group>"; };
 		BFA07F6DA7D17DC0D82BB4A3 /* Pods-HBChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChat.debug.xcconfig"; path = "Target Support Files/Pods-HBChat/Pods-HBChat.debug.xcconfig"; sourceTree = "<group>"; };
 		D04EF8B8AF4B7610A75F2CEF /* Pods-HBChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChat.release.xcconfig"; path = "Target Support Files/Pods-HBChat/Pods-HBChat.release.xcconfig"; sourceTree = "<group>"; };
+		D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareWebViewController.swift; sourceTree = "<group>"; };
+		D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendViewController.swift; sourceTree = "<group>"; };
 		D0EE2C1B232A3144000F16A2 /* HBChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HBChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0EE2C1E232A3144000F16A2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D0EE2C20232A3144000F16A2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -146,6 +150,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		D061B5DE232F8CCA0089BEF3 /* 网页 */ = {
+			isa = PBXGroup;
+			children = (
+				D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */,
+			);
+			path = "网页";
+			sourceTree = "<group>";
+		};
+		D061B5E1232F8CD10089BEF3 /* 好友资料 */ = {
+			isa = PBXGroup;
+			children = (
+				D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */,
+			);
+			path = "好友资料";
+			sourceTree = "<group>";
+		};
 		D0EE2C12232A3144000F16A2 = {
 			isa = PBXGroup;
 			children = (
@@ -171,6 +191,8 @@
 		D0EE2C1D232A3144000F16A2 /* HBChat */ = {
 			isa = PBXGroup;
 			children = (
+				D061B5E1232F8CD10089BEF3 /* 好友资料 */,
+				D061B5DE232F8CCA0089BEF3 /* 网页 */,
 				D0EE2C68232A321A000F16A2 /* Network */,
 				D0EE2C63232A321A000F16A2 /* ThirdPart */,
 				D0EE2C4C232A320E000F16A2 /* 朋友圈 */,
@@ -502,6 +524,7 @@
 				D0EE2C61232A320E000F16A2 /* FriendCircleViewModel.swift in Sources */,
 				D0EE2C6E232A321A000F16A2 /* Models.swift in Sources */,
 				D0EE2C5D232A320E000F16A2 /* CircleShareView.swift in Sources */,
+				D061B5E3232F8CD10089BEF3 /* FriendViewController.swift in Sources */,
 				D0EE2C62232A320E000F16A2 /* CircleCommentInputView.swift in Sources */,
 				D0EE2C21232A3144000F16A2 /* ViewController.swift in Sources */,
 				D0EE2C5A232A320E000F16A2 /* BaiduImages.swift in Sources */,
@@ -510,6 +533,7 @@
 				D0EE2C60232A320E000F16A2 /* CircleCommentBtns.swift in Sources */,
 				D0EE2C5E232A320E000F16A2 /* FriendCircleViewController.swift in Sources */,
 				D0EE2C1F232A3144000F16A2 /* AppDelegate.swift in Sources */,
+				D061B5E0232F8CCA0089BEF3 /* ShareWebViewController.swift in Sources */,
 				D0EE2C5F232A320E000F16A2 /* Extensions.swift in Sources */,
 				D0EE2C5B232A320E000F16A2 /* CircleImageContainView.swift in Sources */,
 				D0EE2C59232A320E000F16A2 /* CircleCommentsView.swift in Sources */,

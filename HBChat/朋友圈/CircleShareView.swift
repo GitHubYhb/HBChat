@@ -7,9 +7,20 @@
 //
 
 import UIKit
+import RxSwift
 
 class CircleShareView: UIView {
 
+    var shareInfo:CircleShareInfo? {
+        didSet{
+            guard let info = self.shareInfo else {
+                return
+            }
+            sharedIcon.kf.setImage(with: URL(string: info.shareIcon!))
+            sharedLabel.text = info.shareContent
+        }
+    }
+    
     lazy var sharedIcon: UIImageView = {
         let iv = UIImageView.init()
         iv.backgroundColor = UIColor.gray
@@ -26,11 +37,19 @@ class CircleShareView: UIView {
         return lb
     }()
     
+    let toUrl = PublishSubject<String>()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor(red:0.95, green:0.95, blue:0.96, alpha:1)
         
         layoutViews()
+        
+        let tap = UITapGestureRecognizer.init(target: self, action: #selector(tapShare))
+        self.addGestureRecognizer(tap)
+    }
+    @objc func tapShare(){
+        self.toUrl.onNext(self.shareInfo!.shareUrl!)
     }
     func layoutViews(){
         addSubview(sharedIcon)

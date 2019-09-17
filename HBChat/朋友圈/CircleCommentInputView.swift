@@ -20,7 +20,6 @@ class CircleCommentInputView: UIView {
         return btn
     }()
     
-    //支持IQKeyboard
     lazy var inputBackgroundView: UIView = {
         let v = UIView.init()
         v.backgroundColor = .white
@@ -31,8 +30,15 @@ class CircleCommentInputView: UIView {
     lazy var textInputView: UITextView = {
         let tv = UITextView.init()
         tv.font = UIFont.systemFont(ofSize: 16)
+        tv.showsVerticalScrollIndicator = false
+        tv.showsHorizontalScrollIndicator = false
+        tv.contentInset = UIEdgeInsets.init(top: 0, left: 0, bottom: -15, right: 0)
         return tv
     }()
+    
+    let viewHeight = PublishSubject<(CGFloat,CGFloat)>()
+    
+    var oldHeight:CGFloat = 56
     
     let disposeBag = DisposeBag()
     
@@ -53,8 +59,8 @@ class CircleCommentInputView: UIView {
         inputBackgroundView.snp.makeConstraints{
             $0.left.equalTo(10)
             $0.right.equalTo(faceButton.snp.left).offset(-10)
-            $0.top.equalTo(5)
-            $0.bottom.equalTo(-5)
+            $0.top.equalTo(10)
+            $0.bottom.equalTo(-10)
         }
         
         textInputView.snp.makeConstraints{
@@ -68,19 +74,17 @@ class CircleCommentInputView: UIView {
         //监听输入框内容高度
         textInputView.rx.observe(CGSize.self, "contentSize").subscribe(onNext: {[weak self] size in
             print(size as Any)
-            let height = size?.height ?? 0
+            var height = size?.height ?? 0
             if height > 0{
                 //最高300
-                if height < 300 {
-                    self?.textInputView.snp.updateConstraints{
-                        $0.height.equalTo(size!.height).priority(990)
-                    }
-                }else{
-                    self?.textInputView.snp.updateConstraints{
-                        $0.height.equalTo(300).priority(990)
-                    }
+                if height > 300{
+                    height = 300
                 }
-                
+                self?.textInputView.snp.updateConstraints{
+                    $0.height.equalTo(size!.height).priority(990)
+                }
+                self?.viewHeight.onNext((height+20,self!.oldHeight-height))
+                self?.oldHeight = height
             }
             
         }).disposed(by: disposeBag)

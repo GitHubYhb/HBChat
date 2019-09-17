@@ -9,6 +9,8 @@
 import Foundation
 import HandyJSON
 import RxSwift
+import Kingfisher
+import UIKit
 
 struct FriendsData:HandyJSON {
     var code: Int = 0
@@ -32,12 +34,10 @@ struct CircleItem :HandyJSON {
     var name:String?
     var imageUrl:String?
     var textContent:String?
-    var imgs:[String]?
+    var imgs:[CircleImage]?
     var comments:[CircleComment]?
     var isShare:Bool?
-    var shareIcon:String?
-    var shareContent:String?
-    var shareSource:String?
+    var shareInfo:CircleShareInfo?
     var likeArr:[CircleLike]?
     var showAllBtn:Bool?{
         get{
@@ -111,7 +111,9 @@ struct CircleItem :HandyJSON {
             }
             
         }
-    }
+    }    
+    
+        
 }
 struct CircleComment:HandyJSON {
     var comment:String?
@@ -126,6 +128,18 @@ struct CircleLike:HandyJSON {
    var name:String?
    var user_id:String?
 }
+struct CircleShareInfo:HandyJSON {
+    var shareIcon:String?
+    var shareContent:String?
+    var shareSource:String?
+    var shareUrl:String?
+}
+struct CircleImage:HandyJSON {
+    var imageUrl:String?
+    var image:UIImage?
+    var imageSize:CGSize?
+}
+
 
 
 

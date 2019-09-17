@@ -64,7 +64,7 @@ class CircleCommentsView: UIView {
                     if index == 0{
                         $0.top.equalTo(5).priority(998)
                     }else{
-                        $0.top.equalTo(top+5).priority(998)
+                        $0.top.equalTo(top + 5).priority(998)
                     }
                     $0.height.equalTo(attrTuple.height).priority(997)
                     
@@ -73,7 +73,7 @@ class CircleCommentsView: UIView {
                     }
                 }
                 //手动计算top
-                top = top + attrTuple.height
+                top = top + attrTuple.height + 5
             }
             
         }
@@ -88,7 +88,7 @@ class CircleCommentsView: UIView {
         let name = NSMutableAttributedString.init(string: item.comment_name!)
         name.yy_font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         name.yy_color = GrayBlueColor
-        name.yy_lineSpacing = 2
+        name.yy_lineSpacing = 5
         name.yy_setTextHighlight(name.yy_rangeOfAll(), color: GrayBlueColor, backgroundColor: UIColor.lightGray, userInfo: ["user_id":item.user_id ?? "110"])
 
         returnAttr.append(name)
@@ -126,6 +126,7 @@ class CircleCommentsView: UIView {
         desc.yy_setTextHighlight(desc.yy_rangeOfAll(), color: UIColor.black, backgroundColor: UIColor.lightGray, userInfo: ["comment_id":item.comment_id ?? "130"])
         returnAttr.append(desc)
         
+        returnAttr.yy_lineSpacing = 5
         
         let layout = YYTextLayout.init(container: container, text: returnAttr)
         return (returnAttr,(layout?.textBoundingSize.height)!)

@@ -138,9 +138,8 @@ class FriendCircleCell: UITableViewCell {
                 infoLabel.text = "1小时前"
             }else{
                 imageContainer.images = []
-                sharedView.sharedIcon.kf.setImage(with: URL(string: model.shareIcon!))
-                sharedView.sharedLabel.text = model.shareContent
-                infoLabel.text = "1小时前  " + model.shareSource!
+                sharedView.shareInfo = model.shareInfo
+                infoLabel.text = "1小时前  " + (model.shareInfo?.shareSource)!
             }
             sharedView.isHidden = !(model.isShare!)
             sharedView.snp.updateConstraints{

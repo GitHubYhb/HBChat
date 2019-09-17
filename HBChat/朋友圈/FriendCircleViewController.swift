@@ -41,7 +41,15 @@ class FriendCircleViewController: UIViewController {
     
     var selectedIndexPath = IndexPath(row: 0, section: 0)
     
+    var selectedCommentID = ""
+    
     var currentRowInputedText = PublishSubject<String>()
+    
+    var keyboardHeight:CGFloat = 0
+    
+    var keyboardHeightOB = PublishSubject<CGFloat>()
+    
+    var offsetValue = PublishSubject<CGFloat>()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -51,6 +59,7 @@ class FriendCircleViewController: UIViewController {
         setupActions()
     }
     func setupViews(){
+        
         title = "朋友圈"
         view.addSubview(tableView)
         view.addSubview(commentAndLike)
@@ -67,27 +76,19 @@ class FriendCircleViewController: UIViewController {
             $0.width.equalTo(0)
             $0.height.equalTo(40)
         }
-        //        viewModel.circleData.bind(to: tableView.rx.items){(tableView,index,item) in
-        //            let identity = "testCellID"
-        //            let cell:FriendCircleCell = tableView.dequeueReusableCell(withIdentifier: identity) as! FriendCircleCell
-        //            cell.index = index
-        //            cell.model = item
-        //            cell.returnIndex = { index in
-        //                print(index)
-        //                tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
-        //            }
-        //            return cell
-        //        }.disposed(by: disposeBag)
         
         //MARK: 评论输入布局
         commentInputView.snp.makeConstraints{
-            $0.bottom.equalTo(50)
+            $0.bottom.equalTo(0)
             $0.right.left.equalToSuperview()
         }
         
         currentRowInputedText.bind(to: commentInputView.textInputView.rx.text).disposed(by: disposeBag)
-
         
+        commentInputView.viewHeight.subscribe(onNext: { height,changeValue in
+            print("changevalue == \(changeValue)")
+        }).disposed(by: disposeBag)
+
     }
     
     func setupActions(){
@@ -108,13 +109,15 @@ class FriendCircleViewController: UIViewController {
             
             //发送输入记录
             self?.currentRowInputedText.onNext(self?.inputRecorder[self!.selectedIndexPath] ?? "" )
-            
+            self?.adjustOffset(indexPath: self!.selectedIndexPath)
+
         }).disposed(by: disposeBag)
         
         //MARK: 点赞按钮点击
         commentAndLike.likeBtn.rx.tap.subscribe(onNext: { [weak self] ob in
             self?.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
         }).disposed(by: disposeBag)
+        
         
         //MARK: 输入框结束输入
         commentInputView.textInputView.rx.didEndEditing.subscribe(onNext: {[weak self] ob in
@@ -126,6 +129,13 @@ class FriendCircleViewController: UIViewController {
             
         }).disposed(by: disposeBag)
         
+        //MARK: 输入视图高度改变
+//        commentInputView.viewHeight.subscribe(onNext: {[weak self] height in
+//            let currentOffset = self?.tableView.contentOffset
+//            let newOffset = CGPoint.init(x: currentOffset!.x, y: currentOffset!.y - height.1)
+//            self?.tableView.setContentOffset(newOffset, animated: true)
+//        }).disposed(by: disposeBag)
+
         //MARK:滑动隐藏键盘 和 按钮
         tableView.rx.willBeginDragging.subscribe(onNext: {[weak self] bool in
             if self?.commentAndLike.isShowing == true{
@@ -134,16 +144,21 @@ class FriendCircleViewController: UIViewController {
             self!.view.endEditing(true)
         }).disposed(by: disposeBag)
         
+        
+        
         //MARK:键盘高度监听
         RxKeyboard.instance.frame
             .drive(onNext: {[weak self] frame in
-                print(frame)
                 let y = frame.origin.y
                 var height = frame.size.height
+                self?.keyboardHeight = height
                 if y != kScreenHeight {
                     height = -height
                 }
-                
+                //初始化的时候键盘高度是0
+                if height == 0 {
+                    height = 300
+                }
                 self!.view.setNeedsUpdateConstraints()
                 UIView.animate(withDuration: 0.2, animations: {
                     self!.commentInputView.snp.updateConstraints{ $0.bottom.equalTo(height) }
@@ -167,6 +182,48 @@ class FriendCircleViewController: UIViewController {
         viewModel.getCircleData()
     }
     
+    
+    //MARK:界面跳转
+    func toFriend(user_id:String) {
+        let friend = FriendViewController()
+        friend.user_id = user_id
+        self.navigationController?.pushViewController(friend, animated: true)
+    }
+    
+    func toWeb(url:String) {
+        let web = ShareWebViewController()
+        web.url = url
+        self.navigationController?.pushViewController(web, animated: true)
+        
+    }
+    
+    func adjustOffset(indexPath:IndexPath) {
+        let cell = tableView.cellForRow(at: indexPath)
+        
+        let viewHeight = self.tableView.frame.size.height
+        
+        let rect = cell!.convert(cell!.bounds, to: self.view!)
+ 
+        
+        
+        /*
+         搞个! complinelatest
+         */
+        
+        let offset = viewHeight - rect.maxY - keyboardHeight - 56
+        self.offsetValue.onNext(offset)
+        let currentOffset = tableView.contentOffset
+        let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
+        tableView.setContentOffset(newOffset, animated: true)
+//        if (rect.maxY+keyboardHeight) > viewHeight{
+//            print("键盘盖住了")
+//        }else{
+//            print("键盘没盖住")
+//        }
+//
+    }
+    
+    
 }
 
 
@@ -180,25 +237,59 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         cell.indexPath = indexPath
         cell.allButtonClickBlock = { [weak self] index in
             //交换数据
-            self?.dataSource[index.row]  = cell.model ?? CircleItem()
+            self?.dataSource[indexPath.row]  = cell.model ?? CircleItem()
             UIView.performWithoutAnimation {//取消刷新动画
-                tableView.reloadRows(at: [index], with: .none)
+                tableView.reloadRows(at: [indexPath], with: .none)
             }
         }
         cell.moreButtonClickBlock = { [weak self] index in
             //标记要评论或者点赞的 indexPath
             self?.selectedIndexPath = index
-            let window = UIApplication.shared.delegate?.window
-            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: window!)
+//            let window = UIApplication.shared.delegate?.window
+            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self?.view)
             self?.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
         }
         
+        cell.sharedView.toUrl.subscribe(onNext: {[weak self] url in
+            
+            print("分享连接跳转 == " + url)
+            
+            self?.toWeb(url: url)
+        }).disposed(by: cell.disposeBag)
+        //MARK:跳转点赞用户
+        cell.likeView.toUser.subscribe(onNext: {[weak self] user_id in
+            
+            print("点赞用户ID == " + user_id)
+            self?.toFriend(user_id: user_id)
+            
+        }).disposed(by: cell.disposeBag)
+        
+        //MARK:跳转评论用户
+        cell.commentsView.toUser.subscribe(onNext: {[weak self] user_id in
+            
+            print("评论用户ID == " + user_id)
+            self?.toFriend(user_id: user_id)
+            
+      
+        }).disposed(by: cell.disposeBag)
+        
+        //MARK:回复评论
+        cell.commentsView.toComment.subscribe(onNext: { [weak self] comment_id in
+            print("评论ID == " + comment_id)
+            //记录选中的评论的ID
+            self?.selectedCommentID = comment_id
+            
+            self?.commentInputView.textInputView.becomeFirstResponder()
+        }).disposed(by: cell.disposeBag)
+        
+       
         //单张图刷新
         cell.imageContainer.needReloadRow.subscribe(onNext: { bool in
+            
             UIView.performWithoutAnimation {//取消刷新动画
                 tableView.reloadRows(at: [indexPath], with: .none)
             }
-        }).disposed(by: disposeBag)
+        }).disposed(by: cell.disposeBag)
         return cell
     }
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
