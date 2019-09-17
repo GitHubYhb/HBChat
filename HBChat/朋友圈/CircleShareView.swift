@@ -39,13 +39,14 @@ class CircleShareView: UIView {
     
     let toUrl = PublishSubject<String>()
     
+    let tap = UITapGestureRecognizer.init()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = UIColor(red:0.95, green:0.95, blue:0.96, alpha:1)
         
         layoutViews()
         
-        let tap = UITapGestureRecognizer.init(target: self, action: #selector(tapShare))
         self.addGestureRecognizer(tap)
     }
     @objc func tapShare(){

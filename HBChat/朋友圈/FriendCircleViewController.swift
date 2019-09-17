@@ -47,10 +47,6 @@ class FriendCircleViewController: UIViewController {
     
     var keyboardHeight:CGFloat = 0
     
-    var keyboardHeightOB = PublishSubject<CGFloat>()
-    
-    var offsetValue = PublishSubject<CGFloat>()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -85,10 +81,6 @@ class FriendCircleViewController: UIViewController {
         
         currentRowInputedText.bind(to: commentInputView.textInputView.rx.text).disposed(by: disposeBag)
         
-        commentInputView.viewHeight.subscribe(onNext: { height,changeValue in
-            print("changevalue == \(changeValue)")
-        }).disposed(by: disposeBag)
-
     }
     
     func setupActions(){
@@ -97,51 +89,55 @@ class FriendCircleViewController: UIViewController {
         self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(title: "reload", style: .done, target: self, action: #selector(reload))
         
         //MARK: 订阅列表数据
-        viewModel.circleData.subscribe(onNext: { [weak self](items) in
-            self?.dataSource = items
-            self?.tableView.reloadData()
+        viewModel.circleData.subscribe(onNext: { [unowned self](items) in
+            self.dataSource = items
+            self.tableView.reloadData()
         }).disposed(by: disposeBag)
         
         //MARK: 评论按钮点击
-        commentAndLike.commentBtn.rx.tap.subscribe(onNext: {[weak self] ob in
-            self?.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
-            self?.commentInputView.textInputView.becomeFirstResponder()
+        commentAndLike.commentBtn.rx.tap.subscribe(onNext: {[unowned self] ob in
+            self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
+            self.commentInputView.textInputView.becomeFirstResponder()
             
             //发送输入记录
-            self?.currentRowInputedText.onNext(self?.inputRecorder[self!.selectedIndexPath] ?? "" )
-            self?.adjustOffset(indexPath: self!.selectedIndexPath)
+            self.currentRowInputedText.onNext(self.inputRecorder[self.selectedIndexPath] ?? "" )
+            self.adjustOffset(indexPath: self.selectedIndexPath)
 
         }).disposed(by: disposeBag)
         
         //MARK: 点赞按钮点击
-        commentAndLike.likeBtn.rx.tap.subscribe(onNext: { [weak self] ob in
-            self?.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
+        commentAndLike.likeBtn.rx.tap.subscribe(onNext: { [unowned self] ob in
+            self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
         }).disposed(by: disposeBag)
         
         
         //MARK: 输入框结束输入
-        commentInputView.textInputView.rx.didEndEditing.subscribe(onNext: {[weak self] ob in
-            guard (self?.commentInputView.textInputView.text.count)! > 0 else {
+        commentInputView.textInputView.rx.didEndEditing.subscribe(onNext: {[unowned self] ob in
+            guard self.commentInputView.textInputView.text.count > 0 else {
                 return
             }
             //记录输入内容
-            self?.inputRecorder[self!.selectedIndexPath] = self?.commentInputView.textInputView.text
+            self.inputRecorder[self.selectedIndexPath] = self.commentInputView.textInputView.text
             
         }).disposed(by: disposeBag)
         
         //MARK: 输入视图高度改变
-//        commentInputView.viewHeight.subscribe(onNext: {[weak self] height in
-//            let currentOffset = self?.tableView.contentOffset
-//            let newOffset = CGPoint.init(x: currentOffset!.x, y: currentOffset!.y - height.1)
-//            self?.tableView.setContentOffset(newOffset, animated: true)
-//        }).disposed(by: disposeBag)
+        commentInputView.viewHeight.subscribe(onNext: {[unowned self] height in
+            let currentOffset = self.tableView.contentOffset
+            var newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - height.0)
+            if self.commentInputView.textInputView.isFirstResponder{
+                newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - height.1)
+            }
+            
+            self.tableView.setContentOffset(newOffset, animated: true)
+        }).disposed(by: disposeBag)
 
         //MARK:滑动隐藏键盘 和 按钮
-        tableView.rx.willBeginDragging.subscribe(onNext: {[weak self] bool in
-            if self?.commentAndLike.isShowing == true{
-                self?.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
+        tableView.rx.willBeginDragging.subscribe(onNext: {[unowned self] bool in
+            if self.commentAndLike.isShowing == true{
+                self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
             }
-            self!.view.endEditing(true)
+            self.view.endEditing(true)
         }).disposed(by: disposeBag)
         
         
@@ -204,26 +200,12 @@ class FriendCircleViewController: UIViewController {
         
         let rect = cell!.convert(cell!.bounds, to: self.view!)
  
-        
-        
-        /*
-         搞个! complinelatest
-         */
-        
         let offset = viewHeight - rect.maxY - keyboardHeight - 56
-        self.offsetValue.onNext(offset)
         let currentOffset = tableView.contentOffset
         let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
         tableView.setContentOffset(newOffset, animated: true)
-//        if (rect.maxY+keyboardHeight) > viewHeight{
-//            print("键盘盖住了")
-//        }else{
-//            print("键盘没盖住")
-//        }
-//
+
     }
-    
-    
 }
 
 
@@ -235,26 +217,44 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         let cell:FriendCircleCell = tableView.dequeueReusableCell(withIdentifier: identity) as! FriendCircleCell
         cell.model = self.dataSource[indexPath.row]
         cell.indexPath = indexPath
-        cell.allButtonClickBlock = { [weak self] index in
+//        cell.allButtonClickBlock = { [weak self] index in
+//
+//        }
+        cell.allButton.rx.tap.subscribe(onNext: {[weak self]  _ in
+            cell.model?.isOpen = !cell.model!.isOpen
             //交换数据
             self?.dataSource[indexPath.row]  = cell.model ?? CircleItem()
             UIView.performWithoutAnimation {//取消刷新动画
                 tableView.reloadRows(at: [indexPath], with: .none)
             }
-        }
-        cell.moreButtonClickBlock = { [weak self] index in
-            //标记要评论或者点赞的 indexPath
-            self?.selectedIndexPath = index
-//            let window = UIApplication.shared.delegate?.window
-            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self?.view)
-            self?.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
-        }
+        }).disposed(by: cell.disposeBag)
         
-        cell.sharedView.toUrl.subscribe(onNext: {[weak self] url in
+        cell.moreButton.rx.tap.subscribe(onNext: {[unowned self]  _ in
+            self.view.endEditing(true)
+            //标记要评论或者点赞的 indexPath
+            self.selectedIndexPath = indexPath
+            //            let window = UIApplication.shared.delegate?.window
+            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self.view)
+            self.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
+        }).disposed(by: cell.disposeBag)
+        
+        
+//        
+//        cell.moreButtonClickBlock = { [unowned self] index in
+//            self.view.endEditing(true)
+//            //标记要评论或者点赞的 indexPath
+//            self.selectedIndexPath = index
+////            let window = UIApplication.shared.delegate?.window
+//            let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self.view)
+//            self.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
+//        }
+        
+        cell.sharedView.tap.rx.event.subscribe(onNext: {[weak self] tap in
             
-            print("分享连接跳转 == " + url)
             
-            self?.toWeb(url: url)
+            print("分享连接跳转 == " + (cell.model?.shareInfo!.shareUrl)!)
+            
+            self?.toWeb(url: (cell.model?.shareInfo!.shareUrl)!)
         }).disposed(by: cell.disposeBag)
         //MARK:跳转点赞用户
         cell.likeView.toUser.subscribe(onNext: {[weak self] user_id in

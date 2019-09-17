@@ -122,7 +122,7 @@ class CircleImageContainView: UIView {
     
     lazy var sepView: UIView = {
         let v = UIView.init()
-        v.backgroundColor = UIColor.red
+//        v.backgroundColor = UIColor.red
         return v
     }()
     

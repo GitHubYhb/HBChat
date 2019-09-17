@@ -16,7 +16,16 @@ class FriendCircleCell: UITableViewCell {
     //方形小图大小
     private let imageItemSize = 60
     
-    let disposeBag = DisposeBag()
+    var disposeBag = DisposeBag()
+    
+    /*
+     * 防止重用！！！
+     * 单元格重用时调用
+     */
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        disposeBag = DisposeBag()
+    }
     
     //头像
     lazy var headImageView: UIImageView = {
@@ -195,10 +204,10 @@ class FriendCircleCell: UITableViewCell {
         }
        
     }
-    typealias AllBlock = (IndexPath)->Void
-    var allButtonClickBlock:AllBlock?
-    typealias MoreBlock = (IndexPath)->Void
-    var moreButtonClickBlock:MoreBlock?
+//    typealias AllBlock = (IndexPath)->Void
+//    var allButtonClickBlock:AllBlock?
+//    typealias MoreBlock = (IndexPath)->Void
+//    var moreButtonClickBlock:MoreBlock?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -207,25 +216,25 @@ class FriendCircleCell: UITableViewCell {
        
         layoutViews()
         
-        setupActions()
+//        setupActions()
         
     }
     private func setupActions(){
-        self.allButton.rx.tap.subscribe(onNext: { [weak self] in
-            if self?.allButtonClickBlock != nil{
-                self?.model?.isOpen = !(self?.model!.isOpen)!
-                self?.allButtonClickBlock!(self!.indexPath!)
-            }
-            
-            
-        }).disposed(by: disposeBag)
+//        self.allButton.rx.tap.subscribe(onNext: { [weak self] in
+//            if self?.allButtonClickBlock != nil{
+//                self?.model?.isOpen = !(self?.model!.isOpen)!
+//                self?.allButtonClickBlock!(self!.indexPath!)
+//            }
+//            
+//            
+//        }).disposed(by: disposeBag)
         
-        
-        self.moreButton.rx.tap.subscribe(onNext: { [weak self] in
-            if self?.moreButtonClickBlock != nil{
-                self?.moreButtonClickBlock!(self!.indexPath!)
-            }
-        }).disposed(by: disposeBag)
+//
+//        self.moreButton.rx.tap.subscribe(onNext: { [weak self] in
+//            if self?.moreButtonClickBlock != nil{
+//                self?.moreButtonClickBlock!(self!.indexPath!)
+//            }
+//        }).disposed(by: disposeBag)
     }
     
     private func layoutViews(){

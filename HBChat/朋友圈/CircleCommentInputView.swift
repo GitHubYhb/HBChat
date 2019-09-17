@@ -72,19 +72,18 @@ class CircleCommentInputView: UIView {
         }
 
         //监听输入框内容高度
-        textInputView.rx.observe(CGSize.self, "contentSize").subscribe(onNext: {[weak self] size in
-            print(size as Any)
+        textInputView.rx.observe(CGSize.self, "contentSize").subscribe(onNext: {[unowned self] size in
             var height = size?.height ?? 0
             if height > 0{
                 //最高300
                 if height > 300{
                     height = 300
                 }
-                self?.textInputView.snp.updateConstraints{
+                self.textInputView.snp.updateConstraints{
                     $0.height.equalTo(size!.height).priority(990)
                 }
-                self?.viewHeight.onNext((height+20,self!.oldHeight-height))
-                self?.oldHeight = height
+                self.viewHeight.onNext((height+20,self.oldHeight-height))
+                self.oldHeight = height
             }
             
         }).disposed(by: disposeBag)
