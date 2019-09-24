@@ -16,7 +16,8 @@ target 'HBChat' do
   pod 'SVProgressHUD'
   pod 'YYText'
   pod 'RxKeyboard'
-  pod 'ImageViewer'
+  
+  
 
   # Pods for HBChat
 

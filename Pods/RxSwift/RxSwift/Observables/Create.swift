@@ -18,11 +18,14 @@ extension ObservableType {
      - returns: The observable sequence with the specified implementation for the `subscribe` method.
      */
     public static func create(_ subscribe: @escaping (AnyObserver<Element>) -> Disposable) -> Observable<Element> {
+        //1. 调用AnonymousObservable 初始化方法，保存了我们写的block 代码
+        
         return AnonymousObservable(subscribe)
     }
 }
 
 final private class AnonymousObservableSink<Observer: ObserverType>: Sink<Observer>, ObserverType {
+    // 重命名
     typealias Element = Observer.Element 
     typealias Parent = AnonymousObservable<Element>
 
@@ -33,11 +36,14 @@ final private class AnonymousObservableSink<Observer: ObserverType>: Sink<Observ
         fileprivate let _synchronizationTracker = SynchronizationTracker()
     #endif
 
+    //初始化 保存了我们传递过来的观察者 
     override init(observer: Observer, cancel: Cancelable) {
         super.init(observer: observer, cancel: cancel)
+        
     }
 
     func on(_ event: Event<Element>) {
+        
         #if DEBUG
             self._synchronizationTracker.register(synchronizationErrorMessage: .default)
             defer { self._synchronizationTracker.unregister() }
@@ -55,8 +61,11 @@ final private class AnonymousObservableSink<Observer: ObserverType>: Sink<Observ
             }
         }
     }
-
+    
+    // 8. AnonymousObservableSink run方法调用
     func run(_ parent: Parent) -> Disposable {
+        //9. 执行保存的block的内容 参数就是我们后续需要执行onNext的观察者
+        // AnyObserver(self)
         return parent._subscribeHandler(AnyObserver(self))
     }
 }
@@ -70,7 +79,9 @@ final private class AnonymousObservable<Element>: Producer<Element> {
         self._subscribeHandler = subscribeHandler
     }
 
+    //6. run方法被调用
     override func run<Observer: ObserverType>(_ observer: Observer, cancel: Cancelable) -> (sink: Disposable, subscription: Disposable) where Observer.Element == Element {
+        //7. 创建 AnonymousObservableSink 调用 run
         let sink = AnonymousObservableSink(observer: observer, cancel: cancel)
         let subscription = sink.run(self)
         return (sink: sink, subscription: subscription)

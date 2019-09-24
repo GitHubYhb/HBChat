@@ -28,20 +28,27 @@ class FriendCircleCell: UITableViewCell {
     }
     
     //头像
+    let headIconTap = UITapGestureRecognizer.init()
     lazy var headImageView: UIImageView = {
         let iv = UIImageView.init()
         iv.backgroundColor = UIColor.groupTableViewBackground
         iv.layer.cornerRadius = 3
+        iv.isUserInteractionEnabled = true
+        iv.addGestureRecognizer(headIconTap)
         return iv
     }()
     
     //名称
+    let nameTap = UITapGestureRecognizer.init()
     lazy var nameLabel: UILabel = {
         let lb = UILabel.init()
         lb.textColor = GrayBlueColor
         lb.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         lb.text = "name"
         lb.numberOfLines = 2
+        lb.isUserInteractionEnabled = true
+        lb.addGestureRecognizer(nameTap)
+
         return lb
     }()
     
@@ -51,7 +58,7 @@ class FriendCircleCell: UITableViewCell {
         lb.textColor = UIColor.black
         lb.numberOfLines = 5
         lb.font = UIFont.systemFont(ofSize: 15)
-        lb.text = "拉到附近阿卡丽三大件费阿拉山口的积分拉手孔缴费的拉三\n等奖费卢卡\n斯就的费卢卡斯就的费卢卡斯就地方了加点开放家史莱克的房间拉三大件费拉克丝的积分乐凯撒点击弗兰克撒娇的费卢卡斯就费卢卡斯就的福利卡就是的弗兰克就阿萨德了副科级萨拉丁\n附近爱上了快递费加拉斯加的法拉三等奖发克鲁赛德弗利萨的就法拉\n盛的法拉盛快递费就"
+        lb.text = "拉到附近阿卡丽"
         return lb
     }()
     
@@ -70,7 +77,6 @@ class FriendCircleCell: UITableViewCell {
     //图片容器
     lazy var imageContainer: CircleImageContainView = {
         let ic = CircleImageContainView.init()
-//        ic.backgroundColor = UIColor.groupTableViewBackground
         return ic
     }()
     
@@ -204,11 +210,7 @@ class FriendCircleCell: UITableViewCell {
         }
        
     }
-//    typealias AllBlock = (IndexPath)->Void
-//    var allButtonClickBlock:AllBlock?
-//    typealias MoreBlock = (IndexPath)->Void
-//    var moreButtonClickBlock:MoreBlock?
-    
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         self.selectionStyle = .none
@@ -216,26 +218,10 @@ class FriendCircleCell: UITableViewCell {
        
         layoutViews()
         
-//        setupActions()
-        
+
+
     }
-    private func setupActions(){
-//        self.allButton.rx.tap.subscribe(onNext: { [weak self] in
-//            if self?.allButtonClickBlock != nil{
-//                self?.model?.isOpen = !(self?.model!.isOpen)!
-//                self?.allButtonClickBlock!(self!.indexPath!)
-//            }
-//            
-//            
-//        }).disposed(by: disposeBag)
-        
-//
-//        self.moreButton.rx.tap.subscribe(onNext: { [weak self] in
-//            if self?.moreButtonClickBlock != nil{
-//                self?.moreButtonClickBlock!(self!.indexPath!)
-//            }
-//        }).disposed(by: disposeBag)
-    }
+    
     
     private func layoutViews(){
         contentView.addSubview(headImageView)

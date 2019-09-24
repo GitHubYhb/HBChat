@@ -19,7 +19,7 @@ class CircleImageContainView: UIView {
     
     let needReloadRow = PublishSubject<Bool>()
     
-    private let updateSepTop = PublishSubject<CGFloat>()
+    let imageTapObserver = PublishSubject<UITapGestureRecognizer>()
     
     var images:[CircleImage]? {
         didSet{
@@ -117,6 +117,9 @@ class CircleImageContainView: UIView {
     }
     lazy var singleImageView: UIImageView = {
         let iv = UIImageView.init()
+        iv.isUserInteractionEnabled = true
+        let tap = UITapGestureRecognizer.init(target: self, action: #selector(imageTap(tap:)))
+        iv.addGestureRecognizer(tap)
         return iv
     }()
     
@@ -125,7 +128,6 @@ class CircleImageContainView: UIView {
         return v
     }()
     
-    let dis = DisposeBag()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -135,10 +137,11 @@ class CircleImageContainView: UIView {
             
             let keyView =  UIImageView.init()
             keyView.contentMode = .scaleAspectFit
-            
+            keyView.isUserInteractionEnabled = true
+            let tap = UITapGestureRecognizer.init(target: self, action: #selector(imageTap(tap:)))
+            keyView.addGestureRecognizer(tap)
             self.addSubview(keyView)
             imageViews.append(keyView)
-            
             keyView.snp.makeConstraints{ make in
                 if index < 3{
                     make.top.equalTo(0)
@@ -147,7 +150,6 @@ class CircleImageContainView: UIView {
                 }else{
                     make.top.equalTo(10+imageItemSize*2)
                 }
-                
                 if index%3 == 0 {
                     make.left.equalTo(0)
                 }else if index%3 == 1 {
@@ -156,7 +158,6 @@ class CircleImageContainView: UIView {
                     make.left.equalTo(10+imageItemSize * 2)
                 }
                 make.width.height.equalTo(imageItemSize)
-                
             }
         }
         
@@ -177,6 +178,9 @@ class CircleImageContainView: UIView {
             $0.bottom.equalToSuperview()
         }
 
+    }
+    @objc func imageTap(tap:UITapGestureRecognizer) {
+        imageTapObserver.onNext(tap)
     }
     
     func resizeImage(size:CGSize,maxWidth:CGFloat)->CGSize{

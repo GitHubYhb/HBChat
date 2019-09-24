@@ -11,7 +11,9 @@ class Producer<Element> : Observable<Element> {
         super.init()
     }
 
+    //4.订阅方法中接收  AnonymousObservable() 发送过来的 AnonymousObserver()
     override func subscribe<Observer: ObserverType>(_ observer: Observer) -> Disposable where Observer.Element == Element {
+        // 5.线程判断然后调用 AnonymousObservable 的run方法
         if !CurrentThreadScheduler.isScheduleRequired {
             // The returned disposable needs to release all references once it was disposed.
             let disposer = SinkDisposer()
@@ -30,7 +32,7 @@ class Producer<Element> : Observable<Element> {
             }
         }
     }
-
+    // 这个run是个幌子，只是一个抽象方法，所以上面调用的self.run() 并不算是这里的这个而是这个“self” 本身，也就是AnonymousObservable
     func run<Observer: ObserverType>(_ observer: Observer, cancel: Cancelable) -> (sink: Disposable, subscription: Disposable) where Observer.Element == Element {
         rxAbstractMethod()
     }

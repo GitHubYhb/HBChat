@@ -26,8 +26,16 @@ class FriendCircleViewController: UIViewController {
         return tb
     }()
     
+    //MARK: 评论输入框
     lazy var commentInputView: CircleCommentInputView = {
         let iv = CircleCommentInputView.init()
+        return iv
+    }()
+    
+    //MARK: 图片预览
+    lazy var imageViewer: HBImageViewer = {
+        let iv = HBImageViewer.init(frame: UIScreen.main.bounds)
+        iv.isHidden = true
         return iv
     }()
     
@@ -49,18 +57,21 @@ class FriendCircleViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        title = "朋友圈"
+        
         setupViews()
         
         setupActions()
     }
+    
     func setupViews(){
         
-        title = "朋友圈"
         view.addSubview(tableView)
         view.addSubview(commentAndLike)
         view.addSubview(commentInputView)
         
+//        let window = UIApplication.shared.keyWindow
+//        window?.addSubview(imageViewer)
       
         //MARK: tableView布局
         tableView.snp.makeConstraints{
@@ -73,13 +84,14 @@ class FriendCircleViewController: UIViewController {
             $0.width.equalTo(0)
             $0.height.equalTo(40)
         }
-        
-        //MARK: 评论输入布局
+//
+//        //MARK: 评论输入布局
         commentInputView.snp.makeConstraints{
-            $0.bottom.equalTo(0)
+            $0.bottom.equalTo(100)
             $0.right.left.equalToSuperview()
         }
         
+        //MARK: 当前输入框文本绑定
         currentRowInputedText.bind(to: commentInputView.textInputView.rx.text).disposed(by: disposeBag)
         
     }
@@ -99,19 +111,19 @@ class FriendCircleViewController: UIViewController {
         commentAndLike.commentBtn.rx.tap.subscribe(onNext: {[unowned self] ob in
             self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
             self.commentInputView.textInputView.becomeFirstResponder()
-            
+
             //发送输入记录
             self.currentRowInputedText.onNext(self.inputRecorder[self.selectedIndexPath] ?? "" )
             self.adjustOffset(indexPath: self.selectedIndexPath)
 
         }).disposed(by: disposeBag)
-        
+
         //MARK: 点赞按钮点击
         commentAndLike.likeBtn.rx.tap.subscribe(onNext: { [unowned self] ob in
             self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
         }).disposed(by: disposeBag)
-        
-        
+
+
         //MARK: 输入框结束输入
         commentInputView.textInputView.rx.didEndEditing.subscribe(onNext: {[unowned self] ob in
             guard self.commentInputView.textInputView.text.count > 0 else {
@@ -119,17 +131,22 @@ class FriendCircleViewController: UIViewController {
             }
             //记录输入内容
             self.inputRecorder[self.selectedIndexPath] = self.commentInputView.textInputView.text
-            
+
         }).disposed(by: disposeBag)
-        
+
         //MARK: 输入视图高度改变
         commentInputView.viewHeight.subscribe(onNext: {[unowned self] height in
             let currentOffset = self.tableView.contentOffset
             var newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - height.0)
             if self.commentInputView.textInputView.isFirstResponder{
-                newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - height.1)
+                let offset = self.getOffset(indexPath: self.selectedIndexPath)
+                if offset < 0 {
+                    newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - height.1)
+                }else{
+                    newOffset = currentOffset
+                }
             }
-            
+
             self.tableView.setContentOffset(newOffset, animated: true)
         }).disposed(by: disposeBag)
 
@@ -140,9 +157,9 @@ class FriendCircleViewController: UIViewController {
             }
             self.view.endEditing(true)
         }).disposed(by: disposeBag)
-        
-        
-        
+
+
+
         //MARK:键盘高度监听
         RxKeyboard.instance.frame
             .drive(onNext: {[weak self] frame in
@@ -153,17 +170,16 @@ class FriendCircleViewController: UIViewController {
                     height = -height
                 }
                 //初始化的时候键盘高度是0
-                if height == 0 {
-                    height = 300
+                if height != 0 {
+                    self!.view.setNeedsUpdateConstraints()
+                    UIView.animate(withDuration: 0.2, animations: {
+                        self!.commentInputView.snp.updateConstraints{ $0.bottom.equalTo(height) }
+                        self!.view.layoutIfNeeded()
+                    })
                 }
-                self!.view.setNeedsUpdateConstraints()
-                UIView.animate(withDuration: 0.2, animations: {
-                    self!.commentInputView.snp.updateConstraints{ $0.bottom.equalTo(height) }
-                    self!.view.layoutIfNeeded()
-                })
             })
             .disposed(by: disposeBag)
-        
+
     }
     
     
@@ -176,20 +192,32 @@ class FriendCircleViewController: UIViewController {
         tableView.scrollToRow(at: IndexPath(row: dataSource.count-1, section: 0), at: .none, animated: true)
     }
     @objc func reload(){
+        inputRecorder.removeAll()
         viewModel.getCircleData()
     }
+    
+    //MARK: 调整offset
     func adjustOffset(indexPath:IndexPath) {
+        //偏差值
+        let offset = getOffset(indexPath: indexPath)
+        if offset<0 {//大于0的时候，cell高度+键盘都没有屏幕高
+            let currentOffset = tableView.contentOffset
+            let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
+            tableView.setContentOffset(newOffset, animated: true)
+        }
+    }
+    func getOffset(indexPath:IndexPath) -> CGFloat {
         let cell = tableView.cellForRow(at: indexPath)
-        
+        //tableview高度
         let viewHeight = self.tableView.frame.size.height
-        
+        //当前cell 的 位置
         let rect = cell!.convert(cell!.bounds, to: self.view!)
+        //输入框高度
+        let inputHeight = self.commentInputView.frame.size.height
+        //偏差值
+        let offset = viewHeight - rect.maxY - keyboardHeight - inputHeight
         
-        let offset = viewHeight - rect.maxY - keyboardHeight - 56
-        let currentOffset = tableView.contentOffset
-        let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
-        tableView.setContentOffset(newOffset, animated: true)
-        
+        return offset
     }
     
     
@@ -219,6 +247,16 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         let cell:FriendCircleCell = tableView.dequeueReusableCell(withIdentifier: identity) as! FriendCircleCell
         cell.model = self.dataSource[indexPath.row]
         cell.indexPath = indexPath
+        //MARK: 头像点击
+        cell.headIconTap.rx.event.subscribe(onNext: { tap in
+            print(cell.model?.name as Any)
+        }).disposed(by: cell.disposeBag)
+        
+        //MARK: 人名点击
+        cell.nameTap.rx.event.subscribe(onNext: { tap in
+            print(cell.model?.name as Any)
+        }).disposed(by: cell.disposeBag)
+        
         
         //MARK: 全文、收起事件
         cell.allButton.rx.tap.subscribe(onNext: {[weak self]  _ in
@@ -273,15 +311,22 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             self?.commentInputView.textInputView.becomeFirstResponder()
         }).disposed(by: cell.disposeBag)
         
+        //MARK:图片点击
+        cell.imageContainer.imageTapObserver.subscribe(onNext: {[unowned self] tap in
+            let imgV:UIImageView = tap.view as! UIImageView
+            self.imageViewer.showWithView(imageV: imgV)
+        }).disposed(by: cell.disposeBag)
+        
+        
         //单张图刷新
         cell.imageContainer.needReloadRow.subscribe(onNext: { bool in
-            
             UIView.performWithoutAnimation {//取消刷新动画
                 tableView.reloadRows(at: [indexPath], with: .none)
             }
         }).disposed(by: cell.disposeBag)
         return cell
     }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.dataSource.count
     }

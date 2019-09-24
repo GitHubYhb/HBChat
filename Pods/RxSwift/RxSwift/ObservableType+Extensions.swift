@@ -38,6 +38,7 @@ extension ObservableType {
      */
     public func subscribe(onNext: ((Element) -> Void)? = nil, onError: ((Swift.Error) -> Void)? = nil, onCompleted: (() -> Void)? = nil, onDisposed: (() -> Void)? = nil)
         -> Disposable {
+            
             let disposable: Disposable
             
             if let disposed = onDisposed {
@@ -52,6 +53,8 @@ extension ObservableType {
             #endif
             
             let callStack = Hooks.recordCallStackOnError ? Hooks.customCaptureSubscriptionCallstack() : []
+            
+            //2. 创建了一个AnonymousObserver<Element>，闭包里面的内容还没用到，他只是用来发给其他人用的
             
             let observer = AnonymousObserver<Element> { event in
                 
@@ -76,7 +79,10 @@ extension ObservableType {
                     disposable.dispose()
                 }
             }
+            
+            //这不是一个闭包
             return Disposables.create(
+                //3. 这里这个self 是我们的方法调用者 AnonymousObservable(subscribe)，将创建好的observer 发送
                 self.asObservable().subscribe(observer),
                 disposable
             )

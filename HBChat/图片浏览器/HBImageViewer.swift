@@ -9,12 +9,13 @@ import UIKit
 
 class HBImageViewer: UIView {
     
-    func showWithRect(rect:CGRect) {
-        self.isHidden = false
-    }
+    var oldRect:CGRect?
+    
     var imageArray:[String]?
     
     var imageView:UIImageView!
+    
+    var isScale = false
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -29,36 +30,91 @@ class HBImageViewer: UIView {
         addSubview(imgv)
         
         let pan =  UIPanGestureRecognizer.init(target: self, action: #selector(panAction(pan:)))
+        
+        let tap = UITapGestureRecognizer.init(target: self, action: #selector(tapAction(tap:)))
+        
+        let doubleTap = UITapGestureRecognizer.init(target: self, action: #selector(doubleTapAction(doubleTap:)))
+        doubleTap.numberOfTapsRequired = 2
+        
         imgv.addGestureRecognizer(pan)
+        imgv.addGestureRecognizer(tap)
+        imgv.addGestureRecognizer(doubleTap)
+        tap.require(toFail: doubleTap)
+        
         self.imageView = imgv
     }
+    
+    func showWithView(imageV:UIImageView) {
+        let window = UIApplication.shared.keyWindow
+        let rect = imageV.convert(imageV.bounds, to: window)
+        oldRect = rect
+        
+        self.alpha = 1
+        self.isHidden = false
+        imageView.frame = rect
+        let image = imageV.image
+        imageView.image = image
+        let size = self.resizeImage(size: image!.size, maxWidth: kScreenWidth)
+        UIView.animate(withDuration: 0.3) {
+            self.imageView.frame = CGRect(x: 0, y: 0, width: size.width, height: size.height)
+            self.imageView.center = self.center
+        }
+        
+    }
+    
     @objc func panAction(pan:UIPanGestureRecognizer){
         let transP = pan.translation(in: self.imageView)
         
-        print(transP)
         switch pan.state {
         case .began: break
         case .changed:
-//            self.imageView.center = transP
             self.imageView.transform = CGAffineTransform.init(translationX: transP.x, y: transP.y)
         case .ended:
             UIView.animate(withDuration: 0.2, delay: 0, options: .curveEaseOut, animations: {
                 self.imageView.transform = CGAffineTransform.init(translationX: 0, y: 0)
             }, completion: nil)
             break
-        case .cancelled:
-            print("cancle")
+        
         default:
             break
         }
-//        pan.setTranslation(CGPoint.zero, in: self.imageView)
-//        // 移动图片控件
-//        self.imageView.transform = CGAffineTransformTranslate(self.imageView.transform, transP.x, transP.y);
-//
-//        // 复位,表示相对上一次
-//        [pan setTranslation:CGPointZero inView:self.imageView];
-
     }
+    
+    @objc func tapAction(tap:UITapGestureRecognizer){
+        if self.isHidden == false {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.imageView.frame = self.oldRect!
+                self.alpha = 0
+            }) { (completed) in
+                self.isHidden = true
+            }
+        }
+    }
+    @objc func doubleTapAction(doubleTap:UITapGestureRecognizer){
+//        let locatePoint = doubleTap.location(in: self.imageView)
+        
+        if isScale == true {
+            isScale = false
+            UIView.animate(withDuration: 0.3) {
+                self.imageView.transform = CGAffineTransform.init(scaleX: 1, y: 1)
+            }
+        }else{
+            isScale = true
+            UIView.animate(withDuration: 0.3) {
+                self.imageView.transform = CGAffineTransform.init(scaleX: 2, y: 2)
+            }
+//            UIView.animate(withDuration: 0.3, animations: {
+//                self.imageView.transform = CGAffineTransform.init(scaleX: 1.5, y: 1.5)
+//                self.alpha = 0
+//            }) { (completed) in
+//                self.isHidden = true
+//            }
+        }
+        
+        
+        
+    }
+    
     
     func resizeImage(size:CGSize,maxWidth:CGFloat)->CGSize{
         
