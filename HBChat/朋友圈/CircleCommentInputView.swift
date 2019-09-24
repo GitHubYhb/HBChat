@@ -33,10 +33,14 @@ class CircleCommentInputView: UIView {
         tv.showsVerticalScrollIndicator = false
         tv.showsHorizontalScrollIndicator = false
         tv.contentInset = UIEdgeInsets.init(top: 0, left: 0, bottom: -15, right: 0)
+        tv.returnKeyType = .send
+        tv.delegate = self
         return tv
     }()
     
     let viewHeight = PublishSubject<(CGFloat,CGFloat)>()
+    
+    let sendSubject = PublishSubject<String>()
     
     var oldHeight:CGFloat = 56
     
@@ -94,4 +98,15 @@ class CircleCommentInputView: UIView {
         fatalError("input view error")
     }
 
+}
+
+extension CircleCommentInputView : UITextViewDelegate{
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        if text == "\n" {
+            textInputView.resignFirstResponder()
+            sendSubject.onNext(textView.text)
+            return false
+        }
+        return true
+    }
 }

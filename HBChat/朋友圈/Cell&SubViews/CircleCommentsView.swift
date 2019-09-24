@@ -15,7 +15,7 @@ import RxSwift
 class CircleCommentsView: UIView {
     
     let toUser = PublishSubject<String>()
-    let toComment = PublishSubject<String>()
+    let toComment = PublishSubject<CircleComment>()
     
     private var commentLabels = [YYLabel]()
     
@@ -49,7 +49,7 @@ class CircleCommentsView: UIView {
                     }
                     if high.userInfo!["comment_id"] != nil {
                         print(high.userInfo!["comment_id"] as Any)
-                        self!.toComment.onNext(high.userInfo!["comment_id"] as! String)
+                        self!.toComment.onNext(item)
                     }
                 }
                 

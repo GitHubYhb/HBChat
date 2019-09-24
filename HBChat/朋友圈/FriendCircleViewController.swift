@@ -49,11 +49,13 @@ class FriendCircleViewController: UIViewController {
     
     var selectedIndexPath = IndexPath(row: 0, section: 0)
     
-    var selectedCommentID = ""
+    var selectedComment = CircleComment()
     
     var currentRowInputedText = PublishSubject<String>()
     
     var keyboardHeight:CGFloat = 0
+    
+    var isReply = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,8 +72,8 @@ class FriendCircleViewController: UIViewController {
         view.addSubview(commentAndLike)
         view.addSubview(commentInputView)
         
-//        let window = UIApplication.shared.keyWindow
-//        window?.addSubview(imageViewer)
+        let window = UIApplication.shared.keyWindow
+        window?.addSubview(imageViewer)
       
         //MARK: tableView布局
         tableView.snp.makeConstraints{
@@ -84,8 +86,8 @@ class FriendCircleViewController: UIViewController {
             $0.width.equalTo(0)
             $0.height.equalTo(40)
         }
-//
-//        //MARK: 评论输入布局
+
+        //MARK: 评论输入布局
         commentInputView.snp.makeConstraints{
             $0.bottom.equalTo(100)
             $0.right.left.equalToSuperview()
@@ -109,9 +111,9 @@ class FriendCircleViewController: UIViewController {
         
         //MARK: 评论按钮点击
         commentAndLike.commentBtn.rx.tap.subscribe(onNext: {[unowned self] ob in
+            self.isReply = false
             self.commentAndLike.dismiss(reshow: false, newRect: CGRect.zero)
             self.commentInputView.textInputView.becomeFirstResponder()
-
             //发送输入记录
             self.currentRowInputedText.onNext(self.inputRecorder[self.selectedIndexPath] ?? "" )
             self.adjustOffset(indexPath: self.selectedIndexPath)
@@ -134,6 +136,31 @@ class FriendCircleViewController: UIViewController {
 
         }).disposed(by: disposeBag)
 
+        //MARK: 输入框点击发送
+        commentInputView.sendSubject.subscribe(onNext: {[weak self] str in
+            if str.count > 0 {
+                //清空记录
+                self?.commentInputView.textInputView.text = ""
+                let cell:FriendCircleCell = self!.tableView.cellForRow(at: self!.selectedIndexPath) as! FriendCircleCell
+                var model = cell.model
+                // 模拟数据
+                var newComment = CircleComment()
+                newComment.comment_name = "评论人"
+                newComment.comment_id = "999"
+                newComment.user_id = "233"
+                newComment.comment = str
+                if self!.isReply == true {
+                    newComment.reply_name = self!.selectedComment.comment_name
+                    newComment.reply_user_id = self!.selectedComment.user_id
+                    newComment.have_reply = true
+                }
+                model?.comments?.append(newComment)
+                self!.dataSource[self!.selectedIndexPath.row] = model!
+                self!.tableView.reloadRows(at: [self!.selectedIndexPath], with: .none)
+                
+            }
+        }).disposed(by: disposeBag)
+        
         //MARK: 输入视图高度改变
         commentInputView.viewHeight.subscribe(onNext: {[unowned self] height in
             let currentOffset = self.tableView.contentOffset
@@ -150,6 +177,9 @@ class FriendCircleViewController: UIViewController {
             self.tableView.setContentOffset(newOffset, animated: true)
         }).disposed(by: disposeBag)
 
+        
+        
+        
         //MARK:滑动隐藏键盘 和 按钮
         tableView.rx.willBeginDragging.subscribe(onNext: {[unowned self] bool in
             if self.commentAndLike.isShowing == true{
@@ -273,7 +303,6 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
             self.view.endEditing(true)
             //标记要评论或者点赞的 indexPath
             self.selectedIndexPath = indexPath
-            //            let window = UIApplication.shared.delegate?.window
             let rect = cell.moreButton.convert(cell.moreButton.bounds, to: self.view)
             self.commentAndLike.showOrHideInRect(rect: rect, indexPath: indexPath)
         }).disposed(by: cell.disposeBag)
@@ -303,12 +332,15 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         }).disposed(by: cell.disposeBag)
         
         //MARK:回复评论
-        cell.commentsView.toComment.subscribe(onNext: { [weak self] comment_id in
-            print("评论ID == " + comment_id)
+        cell.commentsView.toComment.subscribe(onNext: { [weak self] commentItem in
+            print("评论ID == " + commentItem.comment_id!)
+            self?.isReply = true
             //记录选中的评论的ID
-            self?.selectedCommentID = comment_id
+            self?.selectedComment = commentItem
             
             self?.commentInputView.textInputView.becomeFirstResponder()
+            
+            self?.adjustOffset(indexPath: indexPath)
         }).disposed(by: cell.disposeBag)
         
         //MARK:图片点击
