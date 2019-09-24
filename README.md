@@ -106,3 +106,56 @@ if cache.isCached(forKey: urlStr) {
 }
 ```
 
+### Xcode11 iOS 13 tableview 爆出的问题
+```
+2019-09-24 10:55:07.522570+0800 HBChat[83143:12585927] [TableView] Warning once only: UITableView was told to layout its visible cells and other contents without being in the view hierarchy (the table view or one of its superviews has not been added to a window). This may cause bugs by forcing views inside the table view to load and perform layout without accurate information (e.g. table view bounds, trait collection, layout margins, safe area insets, etc), and will also cause unnecessary performance overhead due to extra layout passes. Make a symbolic breakpoint at UITableViewAlertForLayoutOutsideViewHierarchy to catch this in the debugger and see what caused this to occur, so you can avoid this action altogether if possible, or defer it until the table view has been added to a window. Table view: <UITableView: 0x7fca89844c00; frame = (0 0; 414 896); clipsToBounds = YES; gestureRecognizers = <NSArray: 0x60000183b150>; animations = { bounds.origin=<CABasicAnimation: 0x60000161a920>; bounds.size=<CABasicAnimation: 0x60000161a940>; bounds.origin-2=<CABasicAnimation: 0x60000161ad80>; bounds.size-2=<CABasicAnimation: 0x60000161adc0>; }; layer = <CALayer: 0x600001621c20>; contentOffset: {0, -106}; contentSize: {414, 0}; adjustedContentInset: {0, 0, 0, 0}; dataSource: <HBChat.FriendCircleViewController: 0x7fca88f07b00>>
+```
+一开始一直摸不着头脑，不知道哪里出问题，打了断点也看不出问题，然后只好一点一点的注释，看看哪一部分的代码出了问题，最后找到是这里出的问题
+```
+//MARK:键盘高度监听
+RxKeyboard.instance.frame
+    .drive(onNext: {[weak self] frame in
+        let y = frame.origin.y
+        var height = frame.size.height
+        self?.keyboardHeight = height
+        if y != kScreenHeight {
+            height = -height
+        }
+        //初始化的时候键盘高度是0
+        if height == 0 {
+          height = 300
+        }
+        self!.view.setNeedsUpdateConstraints()
+        UIView.animate(withDuration: 0.2, animations: {
+            self!.commentInputView.snp.updateConstraints{ $0.bottom.equalTo(height) }
+            self!.view.layoutIfNeeded()
+        })
+    })
+    .disposed(by: disposeBag)
+```
+在`height = 0 `的时候做动画，导致了这个问题，根据报错的描述，应该是`commentInputView`还没有添加到视图上的时候，就让它做动画，那么解决方法有两个。
+1. 就是判断`commentInputView` 添加到视图上了没，然后再做动画
+2. 就是我的解决方法，因为只有初始化的时候，键盘高度是0，其他时候都不是0，那么只要判断键盘高度不等于0的时候做动画就可以了。
+
+所以我是这么改的
+```
+//MARK:键盘高度监听
+      RxKeyboard.instance.frame
+          .drive(onNext: {[weak self] frame in
+              let y = frame.origin.y
+              var height = frame.size.height
+              self?.keyboardHeight = height
+              if y != kScreenHeight {
+                  height = -height
+              }
+              //初始化的时候键盘高度是0
+              if height != 0 {
+                  self!.view.setNeedsUpdateConstraints()
+                  UIView.animate(withDuration: 0.2, animations: {
+                      self!.commentInputView.snp.updateConstraints{ $0.bottom.equalTo(height) }
+                      self!.view.layoutIfNeeded()
+                  })
+              }
+          })
+          .disposed(by: disposeBag)
+```
