@@ -106,7 +106,7 @@ if cache.isCached(forKey: urlStr) {
 }
 ```
 
-### Xcode11 iOS 13 tableview 爆出的问题
+### 7. Xcode11 iOS 13 tableview 爆出的问题
 ```
 2019-09-24 10:55:07.522570+0800 HBChat[83143:12585927] [TableView] Warning once only: UITableView was told to layout its visible cells and other contents without being in the view hierarchy (the table view or one of its superviews has not been added to a window). This may cause bugs by forcing views inside the table view to load and perform layout without accurate information (e.g. table view bounds, trait collection, layout margins, safe area insets, etc), and will also cause unnecessary performance overhead due to extra layout passes. Make a symbolic breakpoint at UITableViewAlertForLayoutOutsideViewHierarchy to catch this in the debugger and see what caused this to occur, so you can avoid this action altogether if possible, or defer it until the table view has been added to a window. Table view: <UITableView: 0x7fca89844c00; frame = (0 0; 414 896); clipsToBounds = YES; gestureRecognizers = <NSArray: 0x60000183b150>; animations = { bounds.origin=<CABasicAnimation: 0x60000161a920>; bounds.size=<CABasicAnimation: 0x60000161a940>; bounds.origin-2=<CABasicAnimation: 0x60000161ad80>; bounds.size-2=<CABasicAnimation: 0x60000161adc0>; }; layer = <CALayer: 0x600001621c20>; contentOffset: {0, -106}; contentSize: {414, 0}; adjustedContentInset: {0, 0, 0, 0}; dataSource: <HBChat.FriendCircleViewController: 0x7fca88f07b00>>
 ```
