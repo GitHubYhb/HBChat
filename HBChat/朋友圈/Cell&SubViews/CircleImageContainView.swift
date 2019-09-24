@@ -136,7 +136,8 @@ class CircleImageContainView: UIView {
         for index in 0..<9 {
             
             let keyView =  UIImageView.init()
-            keyView.contentMode = .scaleAspectFit
+            keyView.contentMode = .scaleAspectFill
+            keyView.layer.masksToBounds = true
             keyView.isUserInteractionEnabled = true
             let tap = UITapGestureRecognizer.init(target: self, action: #selector(imageTap(tap:)))
             keyView.addGestureRecognizer(tap)

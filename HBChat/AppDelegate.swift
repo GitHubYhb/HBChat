@@ -20,7 +20,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         self.window = UIWindow.init(frame: UIScreen.main.bounds)
         
-        self.window?.rootViewController = UINavigationController.init(rootViewController: FriendCircleViewController())
+        let nav = UINavigationController.init(rootViewController: FriendCircleViewController())
+        // 1.设置导航栏标题属性：设置标题颜色
+        nav.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor:UIColor.black]
+        // 2.设置导航栏前景色：设置item指示色
+        nav.navigationBar.tintColor = UIColor.white
+        // 3.设置导航栏半透明
+        nav.navigationBar.isTranslucent = true
+        // 5.设置导航栏阴影图片
+        nav.navigationBar.shadowImage = UIImage()
+        
+        self.window?.rootViewController = nav
         self.window?.makeKeyAndVisible()
         
         configBase()

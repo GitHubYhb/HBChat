@@ -13,6 +13,7 @@
 		D061B5E0232F8CCA0089BEF3 /* ShareWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */; };
 		D061B5E3232F8CD10089BEF3 /* FriendViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */; };
 		D061B5E72330D0480089BEF3 /* HBImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5E62330D0480089BEF3 /* HBImageViewer.swift */; };
+		D0AC06522339FA9500674EA3 /* FriendCircleTitleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0AC06512339FA9500674EA3 /* FriendCircleTitleView.swift */; };
 		D0EE2C1F232A3144000F16A2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE2C1E232A3144000F16A2 /* AppDelegate.swift */; };
 		D0EE2C21232A3144000F16A2 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0EE2C20232A3144000F16A2 /* ViewController.swift */; };
 		D0EE2C24232A3144000F16A2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D0EE2C22232A3144000F16A2 /* Main.storyboard */; };
@@ -68,6 +69,7 @@
 		D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareWebViewController.swift; sourceTree = "<group>"; };
 		D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendViewController.swift; sourceTree = "<group>"; };
 		D061B5E62330D0480089BEF3 /* HBImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HBImageViewer.swift; sourceTree = "<group>"; };
+		D0AC06512339FA9500674EA3 /* FriendCircleTitleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendCircleTitleView.swift; sourceTree = "<group>"; };
 		D0EE2C1B232A3144000F16A2 /* HBChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HBChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D0EE2C1E232A3144000F16A2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D0EE2C20232A3144000F16A2 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -253,6 +255,7 @@
 			isa = PBXGroup;
 			children = (
 				D061B5E42330C80D0089BEF3 /* Cell&SubViews */,
+				D0AC06512339FA9500674EA3 /* FriendCircleTitleView.swift */,
 				D0EE2C53232A320E000F16A2 /* FriendCircleViewController.swift */,
 				D0EE2C57232A320E000F16A2 /* CircleCommentInputView.swift */,
 				D0EE2C56232A320E000F16A2 /* FriendCircleViewModel.swift */,
@@ -562,6 +565,7 @@
 				D0EE2C6C232A321A000F16A2 /* MoyaProvider+Rx.swift in Sources */,
 				D0EE2C6F232A321A000F16A2 /* API.swift in Sources */,
 				D0EE2C58232A320E000F16A2 /* FriendCircleCell.swift in Sources */,
+				D0AC06522339FA9500674EA3 /* FriendCircleTitleView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

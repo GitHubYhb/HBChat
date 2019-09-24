@@ -138,6 +138,10 @@ class FriendCircleCell: UITableViewCell {
             headImageView.kf.setImage(with: URL(string: model.imageUrl!))
             
             
+            allButton.snp.updateConstraints{
+                $0.height.equalTo(model.showAllBtn == true ? 20 : 0)
+            }
+            
             if model.isOpen == true {
                 self.allButton.setTitle("收起", for: .normal)
                 contentLabel.numberOfLines = 0

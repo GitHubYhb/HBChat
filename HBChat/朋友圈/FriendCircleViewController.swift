@@ -16,6 +16,12 @@ class FriendCircleViewController: UIViewController {
 
     let disposeBag = DisposeBag()
     
+    //MARK: 头部视图
+    lazy var titleView: FriendCircleTitleView = {
+        let tv = FriendCircleTitleView.init(frame: CGRect(x: 0, y: 0, width: kScreenWidth, height: kScreenWidth+50))
+        return tv
+    }()
+    
     lazy var tableView: UITableView = {
         let tb = UITableView.init(frame: view.bounds, style: .plain)
         tb.rowHeight = UITableView.automaticDimension
@@ -23,6 +29,7 @@ class FriendCircleViewController: UIViewController {
         tb.backgroundColor = UIColor.white
         tb.delegate = self
         tb.dataSource = self
+        tb.tableHeaderView = titleView
         return tb
     }()
     
@@ -57,13 +64,18 @@ class FriendCircleViewController: UIViewController {
     
     var isReply = false
     
+    var barImageView:UIView?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "朋友圈"
+        
+        self.navigationController?.navigationBar.barTintColor = NavColor
+        self.barImageView = self.navigationController?.navigationBar.subviews.first
         
         setupViews()
         
         setupActions()
+        
     }
     
     func setupViews(){
@@ -77,7 +89,9 @@ class FriendCircleViewController: UIViewController {
       
         //MARK: tableView布局
         tableView.snp.makeConstraints{
-            $0.top.left.right.bottom.equalToSuperview()
+            
+            $0.top.equalTo(-148)
+            $0.left.right.bottom.equalToSuperview()
         }
         //MARK: 点赞、评论布局
         commentAndLike.snp.makeConstraints{
@@ -99,9 +113,10 @@ class FriendCircleViewController: UIViewController {
     }
     
     func setupActions(){
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(title: "scroll", style: .done, target: self, action: #selector(scroll))
         
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(title: "reload", style: .done, target: self, action: #selector(reload))
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "circle_camera_white"), style: .done, target: self, action: #selector(scroll))
+        
+        self.navigationItem.leftBarButtonItem = UIBarButtonItem.init(image: UIImage.init(named: "circle_back"), style: .done, target: self, action: #selector(reload))
         
         //MARK: 订阅列表数据
         viewModel.circleData.subscribe(onNext: { [unowned self](items) in
@@ -133,7 +148,6 @@ class FriendCircleViewController: UIViewController {
             }
             //记录输入内容
             self.inputRecorder[self.selectedIndexPath] = self.commentInputView.textInputView.text
-
         }).disposed(by: disposeBag)
 
         //MARK: 输入框点击发送
@@ -141,6 +155,7 @@ class FriendCircleViewController: UIViewController {
             if str.count > 0 {
                 //清空记录
                 self?.commentInputView.textInputView.text = ""
+                self?.inputRecorder.removeValue(forKey: self!.selectedIndexPath)
                 let cell:FriendCircleCell = self!.tableView.cellForRow(at: self!.selectedIndexPath) as! FriendCircleCell
                 var model = cell.model
                 // 模拟数据
@@ -209,7 +224,7 @@ class FriendCircleViewController: UIViewController {
                 }
             })
             .disposed(by: disposeBag)
-
+        
     }
     
     
@@ -230,7 +245,7 @@ class FriendCircleViewController: UIViewController {
     func adjustOffset(indexPath:IndexPath) {
         //偏差值
         let offset = getOffset(indexPath: indexPath)
-        if offset<0 {//大于0的时候，cell高度+键盘都没有屏幕高
+        if offset<0 || indexPath.row != 0 {//大于0的时候，cell高度+键盘都没有屏幕高 
             let currentOffset = tableView.contentOffset
             let newOffset = CGPoint.init(x: currentOffset.x, y: currentOffset.y - offset)
             tableView.setContentOffset(newOffset, animated: true)
@@ -240,12 +255,13 @@ class FriendCircleViewController: UIViewController {
         let cell = tableView.cellForRow(at: indexPath)
         //tableview高度
         let viewHeight = self.tableView.frame.size.height
+        print(viewHeight)
         //当前cell 的 位置
         let rect = cell!.convert(cell!.bounds, to: self.view!)
         //输入框高度
         let inputHeight = self.commentInputView.frame.size.height
         //偏差值
-        let offset = viewHeight - rect.maxY - keyboardHeight - inputHeight
+        let offset = viewHeight - rect.maxY - keyboardHeight - inputHeight - 148
         
         return offset
     }
@@ -278,13 +294,15 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         cell.model = self.dataSource[indexPath.row]
         cell.indexPath = indexPath
         //MARK: 头像点击
-        cell.headIconTap.rx.event.subscribe(onNext: { tap in
+        cell.headIconTap.rx.event.subscribe(onNext: {[weak self] tap in
             print(cell.model?.name as Any)
+            self?.toFriend(user_id: "110")
         }).disposed(by: cell.disposeBag)
         
         //MARK: 人名点击
-        cell.nameTap.rx.event.subscribe(onNext: { tap in
+        cell.nameTap.rx.event.subscribe(onNext: {[weak self] tap in
             print(cell.model?.name as Any)
+            self?.toFriend(user_id: "110")
         }).disposed(by: cell.disposeBag)
         
         
@@ -335,6 +353,7 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
         cell.commentsView.toComment.subscribe(onNext: { [weak self] commentItem in
             print("评论ID == " + commentItem.comment_id!)
             self?.isReply = true
+            self?.selectedIndexPath = indexPath
             //记录选中的评论的ID
             self?.selectedComment = commentItem
             
@@ -361,5 +380,24 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.dataSource.count
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        if offsetY < -148 {
+            titleView.showLoading()
+        }
+        
+        var delta = scrollView.contentOffset.y / CGFloat(150)
+        delta = CGFloat.maximum(delta, 0)
+        self.barImageView?.alpha = CGFloat.minimum(delta, 1)
+        
+        if delta > 1 {
+            self.navigationController?.navigationBar.tintColor = .black
+            self.title = "朋友圈"
+        }else{
+            self.navigationController?.navigationBar.tintColor = .white
+            self.title = ""
+        }
     }
 }

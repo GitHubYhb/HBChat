@@ -17,7 +17,9 @@ class FriendViewController: UIViewController {
         self.title = "用户资料"
         view.backgroundColor = .groupTableViewBackground
     }
-    
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationController?.navigationBar.tintColor = .black
+    }
 
     /*
     // MARK: - Navigation
