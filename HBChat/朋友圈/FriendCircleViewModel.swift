@@ -20,7 +20,7 @@ class FriendCircleViewModel: NSObject {
     }
     
     func getCircleData()  {
-        APILoadingProvider.rx.request(.getFriendsCircle).asObservable().mapModel(FriendsCircleData.self).subscribe(onNext: {[weak self] FriendsCircleData in
+        APIProvider.rx.request(.getFriendsCircle).asObservable().mapModel(FriendsCircleData.self).subscribe(onNext: {[weak self] FriendsCircleData in
             self?.circleData.onNext(FriendsCircleData.data!)
         }).disposed(by: disposeBag)
     }

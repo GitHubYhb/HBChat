@@ -10,6 +10,7 @@
 		064C9FF71216E45855167347 /* Pods_HBChatUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E8CF512A5C19F057D3E8724 /* Pods_HBChatUITests.framework */; };
 		2F3CC596366D97FE5AE2E8EB /* Pods_HBChat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D902B7FFC24C3B16DDD2E11C /* Pods_HBChat.framework */; };
 		867CEF8519A6FB097C7F7298 /* Pods_HBChatTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EE11FB3691B6EF2D3BAD080 /* Pods_HBChatTests.framework */; };
+		D02F20F7233B487800BF1E7E /* HBRefresh.swift in Sources */ = {isa = PBXBuildFile; fileRef = D02F20F6233B487800BF1E7E /* HBRefresh.swift */; };
 		D061B5E0232F8CCA0089BEF3 /* ShareWebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */; };
 		D061B5E3232F8CD10089BEF3 /* FriendViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */; };
 		D061B5E72330D0480089BEF3 /* HBImageViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D061B5E62330D0480089BEF3 /* HBImageViewer.swift */; };
@@ -65,6 +66,7 @@
 		710F9770B92D8DDFB45E76A3 /* Pods-HBChatTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChatTests.debug.xcconfig"; path = "Target Support Files/Pods-HBChatTests/Pods-HBChatTests.debug.xcconfig"; sourceTree = "<group>"; };
 		81DE35F24851F10742413F63 /* Pods-HBChatUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChatUITests.release.xcconfig"; path = "Target Support Files/Pods-HBChatUITests/Pods-HBChatUITests.release.xcconfig"; sourceTree = "<group>"; };
 		BFA07F6DA7D17DC0D82BB4A3 /* Pods-HBChat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChat.debug.xcconfig"; path = "Target Support Files/Pods-HBChat/Pods-HBChat.debug.xcconfig"; sourceTree = "<group>"; };
+		D02F20F6233B487800BF1E7E /* HBRefresh.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HBRefresh.swift; sourceTree = "<group>"; };
 		D04EF8B8AF4B7610A75F2CEF /* Pods-HBChat.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HBChat.release.xcconfig"; path = "Target Support Files/Pods-HBChat/Pods-HBChat.release.xcconfig"; sourceTree = "<group>"; };
 		D061B5DF232F8CCA0089BEF3 /* ShareWebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShareWebViewController.swift; sourceTree = "<group>"; };
 		D061B5E2232F8CD10089BEF3 /* FriendViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendViewController.swift; sourceTree = "<group>"; };
@@ -259,6 +261,7 @@
 				D0EE2C53232A320E000F16A2 /* FriendCircleViewController.swift */,
 				D0EE2C57232A320E000F16A2 /* CircleCommentInputView.swift */,
 				D0EE2C56232A320E000F16A2 /* FriendCircleViewModel.swift */,
+				D02F20F6233B487800BF1E7E /* HBRefresh.swift */,
 				D0EE2C4F232A320E000F16A2 /* BaiduImages.swift */,
 				D0EE2C54232A320E000F16A2 /* Extensions.swift */,
 			);
@@ -554,6 +557,7 @@
 				D0EE2C71232A327B000F16A2 /* Globals.swift in Sources */,
 				D0EE2C6B232A321A000F16A2 /* Observable+Response.swift in Sources */,
 				D0EE2C60232A320E000F16A2 /* CircleCommentBtns.swift in Sources */,
+				D02F20F7233B487800BF1E7E /* HBRefresh.swift in Sources */,
 				D0EE2C5E232A320E000F16A2 /* FriendCircleViewController.swift in Sources */,
 				D0EE2C1F232A3144000F16A2 /* AppDelegate.swift in Sources */,
 				D061B5E0232F8CCA0089BEF3 /* ShareWebViewController.swift in Sources */,

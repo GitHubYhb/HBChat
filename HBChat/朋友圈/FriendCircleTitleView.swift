@@ -79,29 +79,34 @@ class FriendCircleTitleView: UIView {
     }
     
     func showLoading() {
+        if isLoading == true {
+            return
+        }
         isLoading = true
-
         self.setNeedsUpdateConstraints()
-        UIView.animate(withDuration: 0.2, animations: {
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
             self.loadingView.snp.updateConstraints{$0.top.equalTo(168)}
             self.layoutIfNeeded()
-        })
+        }, completion: nil)
         
         let rotate = CABasicAnimation.init(keyPath: "transform.rotation.z")
         rotate.toValue = NSNumber.init(value: Double.pi * 6)
         rotate.duration = 2
         rotate.isCumulative = true
-        rotate.repeatCount = 1
+        rotate.repeatCount = 10
         loadingView.layer.add(rotate, forKey: "rotationAnimation")
         
-        self.perform(#selector(hideLoading), with: nil, afterDelay: 2)
+        //测试动画用
+        //self.perform(#selector(hideLoading), with: nil, afterDelay: 2)
     }
     @objc func hideLoading() {
+        isLoading = false
         self.setNeedsUpdateConstraints()
-        UIView.animate(withDuration: 0.2, animations: {
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseInOut, animations: {
             self.loadingView.snp.updateConstraints{$0.top.equalTo(-100)}
             self.layoutIfNeeded()
-        })
+        }, completion: nil)
     }
     
     required init?(coder: NSCoder) {

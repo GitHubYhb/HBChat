@@ -64,6 +64,10 @@ class FriendCircleViewController: UIViewController {
     
     var isReply = false
     
+    var isReload = false
+    
+    var isLoadMore = false
+    
     var barImageView:UIView?
     
     override func viewDidLoad() {
@@ -76,6 +80,16 @@ class FriendCircleViewController: UIViewController {
         
         setupActions()
         
+        tableView.addRefresh(headerBlock: { [weak self] in
+            self?.viewModel.getCircleData()
+        }, footerBlock: {  [weak self] in
+            self?.isLoadMore = true
+            self?.viewModel.getCircleData()
+        })
+//        tableView.addRefresh {
+//            self?.viewModel.getCircleData()
+//        }
+//        
     }
     
     func setupViews(){
@@ -89,10 +103,10 @@ class FriendCircleViewController: UIViewController {
       
         //MARK: tableView布局
         tableView.snp.makeConstraints{
-            
             $0.top.equalTo(-148)
             $0.left.right.bottom.equalToSuperview()
         }
+        
         //MARK: 点赞、评论布局
         commentAndLike.snp.makeConstraints{
             $0.centerY.equalTo(120)
@@ -107,6 +121,8 @@ class FriendCircleViewController: UIViewController {
             $0.right.left.equalToSuperview()
         }
         
+        
+        
         //MARK: 当前输入框文本绑定
         currentRowInputedText.bind(to: commentInputView.textInputView.rx.text).disposed(by: disposeBag)
         
@@ -120,8 +136,27 @@ class FriendCircleViewController: UIViewController {
         
         //MARK: 订阅列表数据
         viewModel.circleData.subscribe(onNext: { [unowned self](items) in
-            self.dataSource = items
-            self.tableView.reloadData()
+            if self.titleView.isLoading == true {
+                self.titleView.hideLoading()
+            }
+            
+            if self.isLoadMore == true {
+                var indexPaths = [IndexPath]()
+                for index in 0..<items.count {
+                    let item = items[index]
+                    self.dataSource.append(item)
+                    
+                    let row = self.dataSource.count-1
+                    let newIndexPath = IndexPath(row: row, section: 0)
+                    indexPaths.append(newIndexPath)
+                }
+                self.tableView.insertRows(at: indexPaths, with: .none)
+            }else{
+                self.dataSource = items
+                self.tableView.reloadData()
+            }
+            self.isLoadMore = false
+            
         }).disposed(by: disposeBag)
         
         //MARK: 评论按钮点击
@@ -384,7 +419,7 @@ extension FriendCircleViewController:UITableViewDelegate,UITableViewDataSource{
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        if offsetY < -148 {
+        if offsetY < -160 {
             titleView.showLoading()
         }
         
